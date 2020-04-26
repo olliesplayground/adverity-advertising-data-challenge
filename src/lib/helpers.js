@@ -80,7 +80,7 @@ export const concatenateGroupedNames = (groups) => {
         let v = _.reduce(values, (accumulator, item) => {
             return [...accumulator,  item.value];
         }, []);
-        console.log('result', result, 'v', v, 'group', group);
+        
         result.push(group + ': ' + _.join(v, ', '));
     }, []).join(' ');
 };
