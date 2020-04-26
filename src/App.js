@@ -2,23 +2,16 @@ import React, { useState } from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
-import Button from 'react-bootstrap/Button';
-import Select from 'react-select';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faInfoCircle } from '@fortawesome/free-solid-svg-icons'
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './App.css';
-
 import _ from 'lodash';
 
-
 import apiData from './data/api.json';
+import Chart from './components/Chart';
+import MultiSelect from './components/MultiSelect';
+import PrimaryButton from './components/PrimaryButton';
+import HeaderText from './components/HeaderText';
 
-import CanvasJSReact from './lib/canvasjs.react';
-let CanvasJS = CanvasJSReact.CanvasJS;
-let CanvasJSChart = CanvasJSReact.CanvasJSChart;
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css';
 
 function getDataFieldValues(data, field) {
   return [...new Set(data.map((item) => {
@@ -97,40 +90,6 @@ function App() {
   const [clicksData, setClicksData] = useState(clickAndImpressionData.clicksData);
   const [impressionsData, setImpressionsData] = useState(clickAndImpressionData.impressionsData);
 
-  const chartOptions = {
-    theme: "light",
-    title: {
-      text: "Clicks & Impressions"
-    },
-    subtitles: [{
-      text: "-"
-    }],
-    toolTip: {
-      shared: true
-    },
-    data: [
-    {
-      type: "line",
-      name: "Clicks",
-      axisYIndex: 0,
-      showInLegend: true,
-      xValueFormatString: "DD MMM YYYY",
-      yValueFormatString: "#,##0.##",
-      dataPoints: clicksData
-    },
-    {
-      type: "line",
-      name: "Impressions",
-      axisYIndex: 1,
-      axisYType: "secondary",
-      showInLegend: true,
-      xValueFormatString: "DD MMM YYYY",
-      yValueFormatString: "#,##0.##",
-      dataPoints: impressionsData
-    }
-    ]
-  };
-
   function handleDatasourceChange(selectedOption) {
     setDatasourcesValue(selectedOption);
   }
@@ -148,76 +107,46 @@ function App() {
 
   return (
     <div className="App">
-      <Container  fluid>
+      <Container fluid>
         <Row>
           <Col>
-            <div className="App-header">
-              Adverity Advertising Data ETL-V Challenge
-            </div>
+            <HeaderText text="Adverity Advertising Data ETL-V Challenge" />
           </Col>
         </Row>
         <Row>
           <Col sm={3}>
             <div className="content bordered padded margined">
-              <div className="App-header">
-                Filter dimension values
-              </div>
-              <div>
-                <span className="heading-inline">Datasource</span> <OverlayTrigger
-                  placement="right"
-                  overlay={
-                    <Tooltip>
-                      Select zero to N Datasources (zero means all)
-                    </Tooltip>
-                  }
-                ><FontAwesomeIcon icon={faInfoCircle} /></OverlayTrigger>
-              </div>
-              <div>
-                <Select
+              <HeaderText text="Filter dimension values" />
+              <MultiSelect 
+                  name="Datasource" 
+                  tooltip={true} 
+                  tooltipText="Select zero to N Datasources (zero means all)"
                   options={datasourceOptions} 
                   value={datasourcesValue} 
-                  isMulti={true} 
-                  onChange={handleDatasourceChange}
-                />
-              </div>
-              <div>
-                <span className="heading-inline">Campaigns</span> <OverlayTrigger
-                  placement="right"
-                  overlay={
-                    <Tooltip>
-                      Select zero to N Campaigns (zero means all)
-                    </Tooltip>
-                  }
-                ><FontAwesomeIcon icon={faInfoCircle} /></OverlayTrigger>
-              </div>
-              <div>
-                <Select
+                  onChangeHandler={handleDatasourceChange}
+              />
+              <MultiSelect 
+                  name="Campaigns" 
+                  tooltip={true} 
+                  tooltipText="Select zero to N Campaigns (zero means all)"
                   options={campaignOptions} 
-                  value={campaignsValue}
-                  isMulti={true} 
-                  onChange={handleCampaignChange}
-                />
-              </div>
-              <div>
-                <Button 
-                  variant="primary" 
-                  onClick={handleApply}
-                >Apply</Button>{' '}
-                <OverlayTrigger
-                  placement="right"
-                  overlay={
-                    <Tooltip>
-                      Hit Apply to filter the chart to show a timeseries for both Clicks and Impressions for the given Datasources and Campaigns - logical AND
-                    </Tooltip>
-                  }
-                ><FontAwesomeIcon icon={faInfoCircle} /></OverlayTrigger>
-              </div>
+                  value={campaignsValue} 
+                  onChangeHandler={handleCampaignChange}
+              />
+              <PrimaryButton 
+                text="Apply" 
+                tooltip={true} 
+                tooltipText="Hit Apply to filter the chart to show a timeseries for both Clicks and Impressions for the given Datasources and Campaigns - logical AND"
+                onClickHandler={handleApply}
+              />
             </div>
           </Col>
           <Col sm={9}>
             <div className="content bordered padded margined">
-              <CanvasJSChart options = {chartOptions}
-                  /* onRef={ref => this.chart = ref} */
+              <Chart 
+                name="Clicks & Impressions" 
+                clicksData={clicksData}
+                impressionsData={impressionsData}
               />
             </div>
           </Col>
