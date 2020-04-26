@@ -10,50 +10,10 @@ import MultiSelect from './components/MultiSelect';
 import PrimaryButton from './components/PrimaryButton';
 import HeaderText from './components/HeaderText';
 
+import { getDataFieldValues, prepareSelectOptions, filterDataOnField, groupByField, sumGroupedData, sortByField } from './lib/helpers';
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-
-function getDataFieldValues(data, field) {
-  return [...new Set(data.map((item) => {
-    return item[field];
-  }))];
-}
-
-function prepareSelectOptions(data) {
-  return data.map((item) => {
-    return {value: item, label: item};
-  });
-}
-
-function filterDataOnField(data, filters, field) {
-  if (!filters || filters.length === 0) {
-    return data;
-  }
-
-  let results = [];
-  _.forEach(filters, (filter) => {
-    results = [...results, _.filter(data, {[field]: filter.value})];
-  });
-  return _.flattenDeep(results);
-}
-
-function groupByField(data, field) {
-  return _.groupBy(data, field);
-  //return _.mapValues(_.groupBy(data, field), clist => clist.map(item => _.omit(item, field)));
-}
-
-function sumGroupedData(data, field) {
-  return _.map(data, (item, group) => {
-    return {
-      'x': new Date(group),
-      'y': _.sumBy(item, field)
-    };
-  });
-}
-
-function sortByField(data, field) {
-  return _.sortBy(data, [field]);
-}
 
 function getClickAndImpressionData(data, datasourceFilters, campaignFilters) {
   let datasourceFilteredData = filterDataOnField(
@@ -78,32 +38,39 @@ function getClickAndImpressionData(data, datasourceFilters, campaignFilters) {
 
 function App() {
   let clickAndImpressionData = getClickAndImpressionData(apiData, [], []);
-
-  let datasources = getDataFieldValues(apiData, 'datasource');
-  let campaigns = getDataFieldValues(apiData, 'campaign');
-
-  const [datasourceOptions, setDatasourceOptions] = useState(prepareSelectOptions(datasources));
-  const [datasourcesValue, setDatasourcesValue] = useState(null);
-  const [campaignOptions, setCampaignOptions] = useState(prepareSelectOptions(campaigns));
-  const [campaignsValue, setCampaignsValue] = useState(null);
-
   const [clicksData, setClicksData] = useState(clickAndImpressionData.clicksData);
   const [impressionsData, setImpressionsData] = useState(clickAndImpressionData.impressionsData);
 
-  function handleDatasourceChange(selectedOption) {
+  const [datasourceOptions, setDatasourceOptions] = useState(
+    prepareSelectOptions(
+      getDataFieldValues(apiData, 'datasource')
+    )
+  );
+  const [datasourcesValue, setDatasourcesValue] = useState(null);
+
+  const [campaignOptions, setCampaignOptions] = useState(
+    prepareSelectOptions(
+      getDataFieldValues(apiData, 'campaign')
+    )
+  );
+  const [campaignsValue, setCampaignsValue] = useState(null);
+
+  
+
+  const handleDatasourceChange = selectedOption => {
     setDatasourcesValue(selectedOption);
-  }
+  };
 
-  function handleCampaignChange(selectedOption) {
+  const handleCampaignChange = selectedOption => {
     setCampaignsValue(selectedOption);
-  }
+  };
 
-  function handleApply(e) {
+  const handleApply = e => {
     let clickAndImpressionData = getClickAndImpressionData(apiData, datasourcesValue, campaignsValue);
     
     setClicksData(clickAndImpressionData.clicksData);
     setImpressionsData(clickAndImpressionData.impressionsData);
-  }
+  };
 
   return (
     <div className="App">
