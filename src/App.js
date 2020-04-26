@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import _ from 'lodash';
 
 import apiData from './data/api.json';
 import Chart from './components/Chart';
@@ -10,52 +9,35 @@ import MultiSelect from './components/MultiSelect';
 import PrimaryButton from './components/PrimaryButton';
 import HeaderText from './components/HeaderText';
 
-import { getDataFieldValues, prepareSelectOptions, filterDataOnField, groupByField, sumGroupedData, sortByField } from './lib/helpers';
+import { 
+  getDataFieldValues, 
+  prepareSelectOptions, 
+  groupByField, 
+  sortByField, 
+  applyFiltersToData, 
+  getSummedGroups 
+} from './lib/helpers';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
-function getClickAndImpressionData(data, datasourceFilters, campaignFilters) {
-  let datasourceFilteredData = filterDataOnField(
-    data, 
-    datasourceFilters, 
-    'datasource'
-  );
-
-  let campaignFilteredData = filterDataOnField(
-    datasourceFilteredData, 
-    campaignFilters, 
-    'campaign'
-  );
-
-  let groupedData = groupByField(campaignFilteredData, 'date');
-
-  let clicksData = sumGroupedData(groupedData, 'clicks');
-  let impressionsData = sumGroupedData(groupedData, 'impressions');
-
-  return {clicksData: sortByField(clicksData, 'x'), impressionsData: sortByField(impressionsData, 'x')};
-}
-
 function App() {
-  let clickAndImpressionData = getClickAndImpressionData(apiData, [], []);
-  const [clicksData, setClicksData] = useState(clickAndImpressionData.clicksData);
-  const [impressionsData, setImpressionsData] = useState(clickAndImpressionData.impressionsData);
+  const [clicksData, setClicksData] = useState([]);
+  const [impressionsData, setImpressionsData] = useState([]);
 
   const [datasourceOptions, setDatasourceOptions] = useState(
     prepareSelectOptions(
       getDataFieldValues(apiData, 'datasource')
     )
   );
-  const [datasourcesValue, setDatasourcesValue] = useState(null);
+  const [datasourcesValue, setDatasourcesValue] = useState([]);
 
   const [campaignOptions, setCampaignOptions] = useState(
     prepareSelectOptions(
       getDataFieldValues(apiData, 'campaign')
     )
   );
-  const [campaignsValue, setCampaignsValue] = useState(null);
-
-  
+  const [campaignsValue, setCampaignsValue] = useState([]);
 
   const handleDatasourceChange = selectedOption => {
     setDatasourcesValue(selectedOption);
@@ -66,11 +48,28 @@ function App() {
   };
 
   const handleApply = e => {
-    let clickAndImpressionData = getClickAndImpressionData(apiData, datasourcesValue, campaignsValue);
-    
-    setClicksData(clickAndImpressionData.clicksData);
-    setImpressionsData(clickAndImpressionData.impressionsData);
+    setChartData();
   };
+
+  const setChartData = () => {
+    const [clicks, impressions] = getSummedGroups(
+      groupByField(
+        applyFiltersToData(apiData, [
+          {filters: datasourcesValue, field: 'datasource'},
+          {filters: campaignsValue, field: 'campaign'}
+        ]), 
+        'date'
+      ), ['clicks', 'impressions'], []
+    );
+
+    setClicksData(sortByField(clicks, 'x'));
+    setImpressionsData(sortByField(impressions, 'x'));
+  };
+
+  useEffect(() => {
+    console.log('LOADED...');
+    setTimeout(setChartData, 500);
+  }, []);
 
   return (
     <div className="App">
@@ -91,7 +90,7 @@ function App() {
                   options={datasourceOptions} 
                   value={datasourcesValue} 
                   onChangeHandler={handleDatasourceChange}
-              />
+              /> 
               <MultiSelect 
                   name="Campaigns" 
                   tooltip={true} 

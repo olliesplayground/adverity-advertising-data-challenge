@@ -40,3 +40,36 @@ export const sumGroupedData = (data, field) => {
 export const sortByField = (data, field) => {
     return _.sortBy(data, [field]);
 };
+
+export const arraySlice = (array, start, end) => {
+    let length = array.length;
+    return length === 0 ? null : _.slice(array, start, (end ?? length));
+};
+
+export const applyFiltersToData = (data, filters) => {
+    let filter = _.nth(filters);
+
+    if (!filter) {
+        return data;
+    }
+
+    let filteredData = filterDataOnField(
+        data, 
+        filter.filters, 
+        filter.field
+    );
+
+    return applyFiltersToData(filteredData, arraySlice(filters, 1));
+};
+
+export const getSummedGroups = (data, groups, accumulator) => {
+    let group = _.nth(groups);
+
+    if (!group) {
+        return accumulator;
+    }
+    
+    accumulator = [...accumulator, sumGroupedData(data, group)];
+
+    return getSummedGroups(data, arraySlice(groups, 1), accumulator);
+};
