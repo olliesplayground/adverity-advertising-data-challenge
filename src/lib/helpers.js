@@ -73,3 +73,14 @@ export const getSummedGroups = (data, groups, accumulator) => {
 
     return getSummedGroups(data, arraySlice(groups, 1), accumulator);
 };
+
+export const concatenateGroupedNames = (groups) => {
+    return _.transform(groups, (result, values, group) => {
+        values = !values || values.length === 0 ? [{value: 'All'}] : values;
+        let v = _.reduce(values, (accumulator, item) => {
+            return [...accumulator,  item.value];
+        }, []);
+        console.log('result', result, 'v', v, 'group', group);
+        result.push(group + ': ' + _.join(v, ', '));
+    }, []).join(' ');
+};

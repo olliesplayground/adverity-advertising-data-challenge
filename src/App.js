@@ -8,6 +8,7 @@ import Chart from './components/Chart';
 import MultiSelect from './components/MultiSelect';
 import PrimaryButton from './components/PrimaryButton';
 import HeaderText from './components/HeaderText';
+import VerticalSpace from './components/VerticalSpace';
 
 import { 
   getDataFieldValues, 
@@ -15,13 +16,15 @@ import {
   groupByField, 
   sortByField, 
   applyFiltersToData, 
-  getSummedGroups 
+  getSummedGroups, 
+  concatenateGroupedNames
 } from './lib/helpers';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
 function App() {
+  const [chartName, setChartName] = useState(concatenateGroupedNames({'Datasources': [], 'Campaigns': []}));
   const [clicksData, setClicksData] = useState([]);
   const [impressionsData, setImpressionsData] = useState([]);
 
@@ -49,6 +52,7 @@ function App() {
 
   const handleApply = e => {
     setChartData();
+    setChartName(concatenateGroupedNames({'Datasources': datasourcesValue, 'Campaigns': campaignsValue}));
   };
 
   const setChartData = () => {
@@ -83,6 +87,7 @@ function App() {
           <Col sm={3}>
             <div className="content bordered padded margined">
               <HeaderText text="Filter dimension values" />
+              <VerticalSpace class="bottom10" />
               <MultiSelect 
                   name="Datasource" 
                   tooltip={true} 
@@ -91,6 +96,7 @@ function App() {
                   value={datasourcesValue} 
                   onChangeHandler={handleDatasourceChange}
               /> 
+              <VerticalSpace class="bottom10" /> 
               <MultiSelect 
                   name="Campaigns" 
                   tooltip={true} 
@@ -98,7 +104,8 @@ function App() {
                   options={campaignOptions} 
                   value={campaignsValue} 
                   onChangeHandler={handleCampaignChange}
-              />
+              /> 
+              <VerticalSpace class="bottom15" />
               <PrimaryButton 
                 text="Apply" 
                 tooltip={true} 
@@ -110,7 +117,7 @@ function App() {
           <Col sm={9}>
             <div className="content bordered padded margined">
               <Chart 
-                name="Clicks & Impressions" 
+                name={chartName} 
                 clicksData={clicksData}
                 impressionsData={impressionsData}
               />
